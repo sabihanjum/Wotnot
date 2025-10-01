@@ -3,11 +3,11 @@
 # ---------------------------
 FROM node:18 AS frontend-builder
 
-WORKDIR /frontend
+WORKDIR /app/frontend
 
 # Install frontend dependencies
 COPY frontend/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy frontend source and build
 COPY frontend/ .
@@ -15,7 +15,7 @@ RUN npm run build
 
 
 # ---------------------------
-# Stage 2: Backend with Python
+# Stage 2: Backend
 # ---------------------------
 FROM python:3.10-slim
 
@@ -25,14 +25,14 @@ WORKDIR /app
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend source code
+# Copy backend code
 COPY backend/ .
 
-# Copy built frontend into backend's static directory
-COPY --from=frontend-builder /frontend/dist ./static
+# Copy built frontend to backend/static
+COPY --from=frontend-builder /app/frontend/dist ./static
 
-# Expose port
+# Expose FastAPI port
 EXPOSE 8000
 
-# Run FastAPI with Uvicorn
+# Start FastAPI app
 CMD ["uvicorn", "wati.main:app", "--host", "0.0.0.0", "--port", "8000"]
