@@ -1,20 +1,33 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
 from .database import database
-from .routes import user, broadcast, contacts, auth, woocommerce, integration, wallet, analytics
+from .routes import (
+    user,
+    broadcast,
+    contacts,
+    auth,
+    woocommerce,
+    integration,
+    wallet,
+    analytics,
+)
 from .services import dramatiq_router
 from . import oauth2
 from .models import ChatBox
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.future import select
 from datetime import datetime, timedelta
 from typing import AsyncGenerator
+import os
 
-
+# Initialize FastAPI app
 app = FastAPI()
 scheduler = AsyncIOScheduler()
 scheduler_started = False
-
 
 # CORS middleware configuration
 app.add_middleware(
@@ -27,7 +40,6 @@ app.add_middleware(
 
 # Include routers
 app.include_router(broadcast.router, prefix="/broadcast")
-# app.include_router(broadcast.router)  # also expose broadcast routes at root (e.g. /template)
 app.include_router(contacts.router)
 app.include_router(user.router)
 app.include_router(auth.router)
@@ -56,7 +68,7 @@ async def close_expired_chats() -> None:
             result = await session.execute(
                 select(ChatBox.Last_Conversation).where(
                     ChatBox.Last_Conversation.active == True,
-                    ChatBox.Last_Conversation.last_chat_time < threshold
+                    ChatBox.Last_Conversation.last_chat_time < threshold,
                 )
             )
             expired_conversations = result.scalars().all()
@@ -94,3 +106,23 @@ async def shutdown_event() -> None:
         scheduler.shutdown(wait=False)
         scheduler_started = False
         print("Scheduler shut down.")
+
+
+# ---------------------------------------------------
+# Serve frontend build (React/Vue/Angular SPA)
+# ---------------------------------------------------
+# After Docker build, frontend is copied into ./static
+frontend_path = os.path.join(os.path.dirname(__file__), "static")
+
+if os.path.isdir(frontend_path):
+    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """
+        Catch-all route to serve index.html for React Router/SPA support.
+        """
+        index_file = os.path.join(frontend_path, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        return {"detail": "Frontend build not found"}
