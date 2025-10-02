@@ -49,9 +49,11 @@ load_dotenv()
 
 # Fetch values
 backend_url = os.getenv("BACKEND_URL")
-database_url = os.getenv("DATABASE_URL")
-# SQLAlchemy Database Configuration
-SQLALCHEMY_DATABASE_URL = database_url #'postgresql+asyncpg://postgres:Denmarks123$@localhost/wati_clone'
+# database_url = os.getenv("DATABASE_URL")
+# # SQLAlchemy Database Configuration
+# SQLALCHEMY_DATABASE_URL = database_url #'postgresql+asyncpg://postgres:Denmarks123$@localhost/wati_clone'
+SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL") or os.getenv("DATABASE_URL")
+print("[tasks.py] SQLALCHEMY_DATABASE_URL =", SQLALCHEMY_DATABASE_URL)
 
 engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 
