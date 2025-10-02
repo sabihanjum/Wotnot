@@ -1,11 +1,17 @@
+
 import os
-from dotenv import load_dotenv
 
-# Load environment variables from a .env file if present (safe locally, ignored in production)
-load_dotenv()
+# Remove load_dotenv if only used in Render
+# from dotenv import load_dotenv
+# load_dotenv()
 
-# Tries SQLALCHEMY_DATABASE_URL first, falls back to DATABASE_URL
 SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL") or os.getenv("DATABASE_URL")
+print("[Debug] SQLALCHEMY_DATABASE_URL =", SQLALCHEMY_DATABASE_URL)
+
+if not SQLALCHEMY_DATABASE_URL:
+    raise RuntimeError("No database URL found! Set SQLALCHEMY_DATABASE_URL or DATABASE_URL as an environment variable.")
+
+# ...rest of code unchanged
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
