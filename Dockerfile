@@ -2,9 +2,11 @@
 FROM node:18 AS frontend-builder
 WORKDIR /app/frontend/app
 
+# Install frontend dependencies
 COPY frontend/app/package*.json ./
 RUN npm install --legacy-peer-deps
 
+# Copy all frontend source, then build
 COPY frontend/app/ ./
 RUN npm run build
 
@@ -26,7 +28,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ ./backend/
 
-# >>> Fix the path here <<<
+# Copy built frontend to backend/static
 COPY --from=frontend-builder /app/frontend/app/dist ./backend/static
 
 EXPOSE 8000
