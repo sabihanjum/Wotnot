@@ -50,11 +50,9 @@ app.include_router(woocommerce.router)
 app.include_router(integration.router)
 app.include_router(analytics.router)
 
-
 async def create_db_and_tables():
     async with database.engine.begin() as conn:
         await conn.run_sync(database.Base.metadata.create_all)
-
 
 async def close_expired_chats() -> None:
     """
@@ -81,7 +79,6 @@ async def close_expired_chats() -> None:
     except Exception as e:
         print(f"Error in close_expired_chats: {e}")
 
-
 @app.on_event("startup")
 async def startup_event() -> None:
     """
@@ -95,7 +92,6 @@ async def startup_event() -> None:
         scheduler_started = True
         print("Scheduler started.")
 
-
 @app.on_event("shutdown")
 async def shutdown_event() -> None:
     """
@@ -107,7 +103,6 @@ async def shutdown_event() -> None:
         scheduler_started = False
         print("Scheduler shut down.")
 
-
 # ---------------------------------------------------
 # Serve frontend build (React/Vue/Angular SPA)
 # ---------------------------------------------------
@@ -115,7 +110,7 @@ async def shutdown_event() -> None:
 frontend_path = os.path.join(os.path.dirname(__file__), "static")
 
 if os.path.isdir(frontend_path):
-    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
+    app.mount("/", StaticFiles(directory=frontendend_path, html=True), name="static")
 
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
