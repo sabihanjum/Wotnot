@@ -1,6 +1,11 @@
 const webpack = require('webpack');
 
 module.exports = {
+  // This sets the public path for production (important for GitHub Pages or subdomain hosting!)
+  publicPath: process.env.NODE_ENV === 'production'
+    ? '/<REPO_NAME>/'   // <-- Replace <REPO_NAME> with your repository/project name for GitHub Pages, or '/' if deploying at root
+    : '/',
+
   configureWebpack: {
     plugins: [
       new webpack.DefinePlugin({
@@ -13,7 +18,7 @@ module.exports = {
     const vueRule = config.module.rule('vue').use('vue-loader');
     vueRule.tap(options => {
       options.compilerOptions = options.compilerOptions || {};
-      // ...existing code...
+      // ... insert any additional compilerOptions here ...
       return options;
     });
   },
@@ -27,9 +32,6 @@ module.exports = {
         secure: false,
       },
     },
-    // Correct websocket config for dev-client:
-    // If you use ngrok with HTTPS, point client.webSocketURL to the ngrok host on port 443 (wss).
-    // Replace the hostname below with your ngrok host if needed.
     client: {
       webSocketURL: {
         protocol: 'wss',
@@ -37,7 +39,7 @@ module.exports = {
         port: 443,
         pathname: '/ws'
       }
-      // Alternatively remove webSocketURL entirely to use the default local ws endpoint.
+      // Alternatively remove webSocketURL to use the default local ws endpoint.
     },
   },
 };
