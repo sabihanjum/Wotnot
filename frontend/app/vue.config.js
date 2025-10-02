@@ -1,15 +1,12 @@
 const webpack = require('webpack');
 
 module.exports = {
-  // This sets the public path for production (important for GitHub Pages or subdomain hosting!)
-  publicPath: process.env.NODE_ENV === 'production'
-    ? '/<REPO_NAME>/'   // <-- Replace <REPO_NAME> with your repository/project name for GitHub Pages, or '/' if deploying at root
-    : '/',
+  publicPath: '/',
 
   configureWebpack: {
     plugins: [
       new webpack.DefinePlugin({
-        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(true),
+        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(true)
       }),
     ],
   },
@@ -18,7 +15,7 @@ module.exports = {
     const vueRule = config.module.rule('vue').use('vue-loader');
     vueRule.tap(options => {
       options.compilerOptions = options.compilerOptions || {};
-      // ... insert any additional compilerOptions here ...
+      // You can put other compilerOptions here.
       return options;
     });
   },
@@ -39,7 +36,7 @@ module.exports = {
         port: 443,
         pathname: '/ws'
       }
-      // Alternatively remove webSocketURL to use the default local ws endpoint.
+      // Remove webSocketURL to use default local ws endpoint if needed.
     },
   },
 };
